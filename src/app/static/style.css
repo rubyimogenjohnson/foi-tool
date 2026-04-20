@@ -1,0 +1,197 @@
+/* ===================================================================
+   Camden FOI Search — app-specific overrides
+   Everything else comes from /vendor/lbcamden.min.css
+   =================================================================== */
+
+/* Staff link in public phase banner */
+.foi-staff-link {
+  margin-left: auto;
+}
+
+/* Source cards on the public portal */
+.foi-source-card {
+  border-left: 4px solid #1d70b8;
+  padding: 1rem 1rem 1rem 1.25rem;
+  margin-bottom: 1rem;
+  background: #f3f2f1;
+}
+
+.foi-source-ref {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.25rem !important;
+}
+
+.foi-recency-tag {
+  font-size: 0.75rem !important;
+}
+
+.foi-source-title {
+  font-weight: 600;
+  margin-bottom: 0.25rem !important;
+}
+
+/* Answer prose block */
+.foi-answer {
+  margin-bottom: 1.5rem;
+}
+
+/* Staff table */
+.foi-staff-table {
+  font-size: 0.9rem;
+}
+
+.foi-cell-ref {
+  font-family: "Courier New", Courier, monospace;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.foi-cell-date {
+  white-space: nowrap;
+}
+
+.foi-cell-score {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.foi-top-row td {
+  background-color: #e8f4e8;
+}
+
+/* Result count badge next to heading */
+.foi-count-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #1d70b8;
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 600;
+  min-width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 1rem;
+  padding: 0 0.4rem;
+  vertical-align: middle;
+  margin-left: 0.4rem;
+}
+
+/* ── Feedback widget ────────────────────────────────────────────── */
+
+.foi-feedback-widget {
+  margin-top: 1.5rem;
+  padding: 1.25rem 1.5rem;
+  background: #f3f2f1;
+  border-left: 5px solid #b1b4b6;
+}
+
+.foi-feedback-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.foi-feedback-buttons .govuk-button {
+  margin-bottom: 0;
+}
+
+/* Results section top spacing */
+.foi-results {
+  margin-top: 1rem;
+}
+
+/* ── Annotation page ────────────────────────────────────────────── */
+
+.foi-annotate-doc {
+  max-height: 65vh;
+  overflow-y: auto;
+  border: 1px solid #b1b4b6;
+  border-radius: 2px;
+  padding: 1rem 1.25rem;
+  background: #fafafa;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.foi-annotate-chunk {
+  white-space: pre-wrap;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px dashed #b1b4b6;
+}
+
+.foi-annotate-chunk:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.foi-annotate-form-panel {
+  background: #f3f2f1;
+  padding: 1.5rem;
+  border-left: 5px solid #1d70b8;
+  position: sticky;
+  top: 1rem;
+}
+
+/* ── Staff nav spacing fix ──────────────────────────────────────── */
+/* The site-navigation header bar can overflow when there are 3+ nav
+   items alongside the title. Tighten padding and allow wrapping.    */
+
+.lbcamden-header--site-navigation .lbcamden-header__bar {
+  flex-wrap: wrap;
+  gap: 0.25rem 0;
+}
+
+.lbcamden-header--site-navigation .lbcamden-header__navigation-item-link {
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+  font-size: 0.875rem;
+  white-space: nowrap;
+}
+
+/* ── Loading state ──────────────────────────────────────────────── */
+
+[hidden] { display: none !important; }
+
+.foi-loading {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  padding: 1.25rem 1.5rem;
+  border-left: 5px solid #1d70b8;
+  background: #f3f2f1;
+}
+
+.foi-loading__step {
+  margin-bottom: 0.25rem !important;
+}
+
+.foi-loading__hint {
+  margin-bottom: 0 !important;
+  color: #505a5f;
+}
+
+/* CSS-only spinner — only animates when the parent is visible */
+.foi-loading__spinner {
+  flex-shrink: 0;
+  width: 1.75rem;
+  height: 1.75rem;
+  margin-top: 0.15rem;
+  border: 3px solid #b1b4b6;
+  border-top-color: #1d70b8;
+  border-radius: 50%;
+  animation: none;
+}
+
+.foi-loading:not([hidden]) .foi-loading__spinner {
+  animation: foi-spin 0.8s linear infinite;
+}
+
+@keyframes foi-spin {
+  to { transform: rotate(360deg); }
+}

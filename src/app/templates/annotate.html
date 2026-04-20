@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+
+{% block title %}Add evaluation questions — Camden FOI{% endblock %}
+
+{% block service_header %}
+<div class="lbcamden-header lbcamden-header--site-navigation">
+  <div class="lbcamden-header__bar govuk-width-container">
+    <div class="lbcamden-header__title">
+      <a href="/staff" class="lbcamden-header__link">FOI Staff Search</a>
+    </div>
+    <nav class="lbcamden-header__navigation" aria-label="Staff navigation">
+      <ul class="lbcamden-header__navigation-list">
+        <li class="lbcamden-header__navigation-item">
+          <a class="lbcamden-header__navigation-item-link" href="/staff/eval">Evaluation</a>
+        </li>
+        <li class="lbcamden-header__navigation-item lbcamden-header__navigation-item--active">
+          <a class="lbcamden-header__navigation-item-link" href="/staff/eval/annotate">Add questions</a>
+        </li>
+        <li class="lbcamden-header__navigation-item">
+          <a class="lbcamden-header__navigation-item-link" href="/staff/stats">Feedback stats</a>
+        </li>
+        <li class="lbcamden-header__navigation-item">
+          <a class="lbcamden-header__navigation-item-link" href="/">Public portal</a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</div>
+<div class="govuk-width-container">
+  <div class="govuk-phase-banner">
+    <p class="govuk-phase-banner__content">
+      <strong class="govuk-tag govuk-phase-banner__content__tag govuk-tag--blue">Internal</strong>
+      <span class="govuk-phase-banner__text">For Camden Council staff only</span>
+    </p>
+  </div>
+</div>
+{% endblock %}
+
+{% block content %}
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-full">
+    <h1 class="govuk-heading-xl">Add evaluation questions</h1>
+    <p class="govuk-body">
+      Read the FOI below, then write a natural-language question that this response answers.
+      Each question you save improves the evaluation dataset.
+    </p>
+  </div>
+</div>
+
+{% if saved %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <div class="govuk-notification-banner govuk-notification-banner--success" role="alert"
+         aria-labelledby="govuk-notification-banner-title" data-module="govuk-notification-banner">
+      <div class="govuk-notification-banner__header">
+        <h2 class="govuk-notification-banner__title" id="govuk-notification-banner-title">Saved</h2>
+      </div>
+      <div class="govuk-notification-banner__content">
+        <p class="govuk-body">Question <strong>{{ saved }}</strong> added to the evaluation dataset.</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<div class="govuk-grid-row">
+
+  {# ── Left: FOI content ──────────────────────────────────────── #}
+  <div class="govuk-grid-column-one-half">
+
+    {% if foi_meta %}
+      <h2 class="govuk-heading-m">{{ foi_meta.title or identifier }}</h2>
+      <p class="govuk-body-s">
+        <strong>{{ identifier }}</strong> &middot; {{ foi_meta.date }}
+        {% if foi_meta.link %}
+          &middot; <a href="{{ foi_meta.link }}" class="govuk-link" target="_blank" rel="noopener noreferrer">View original</a>
+        {% endif %}
+      </p>
+
+      <div class="foi-annotate-doc">
+        {% for chunk in foi_chunks %}
+          {% if foi_chunks | length > 1 %}
+            <p class="govuk-body-s govuk-!-color-secondary-text-on-light govuk-!-margin-bottom-1">
+              Part {{ chunk.index + 1 }} of {{ chunk.total }}
+            </p>
+          {% endif %}
+          <div class="foi-annotate-chunk">{{ chunk.text }}</div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="govuk-body">Could not load an FOI — is the database connected?</p>
+    {% endif %}
+
+  </div>
+
+  {# ── Right: annotation form ─────────────────────────────────── #}
+  <div class="govuk-grid-column-one-half">
+    <div class="foi-annotate-form-panel">
+      <h2 class="govuk-heading-m">Write a question for this FOI</h2>
+
+      {% if already_covered %}
+        <div class="govuk-warning-text">
+          <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+          <strong class="govuk-warning-text__text">
+            <span class="govuk-visually-hidden">Warning</span>
+            This FOI is already referenced in {{ already_covered | length }} question(s) — you can still add more.
+          </strong>
+        </div>
+      {% endif %}
+
+      <form method="POST" action="/staff/eval/annotate/save">
+        <input type="hidden" name="identifier" value="{{ identifier | e }}">
+
+        <div class="govuk-form-group">
+          <label class="govuk-label govuk-label--s" for="identifiers">
+            Relevant FOI identifiers
+            <span class="govuk-hint">Add more comma-separated if multiple FOIs answer this question.</span>
+          </label>
+          <input class="govuk-input" id="identifiers" name="identifiers" type="text"
+                 value="{{ identifier | e }}">
+        </div>
+
+        <div class="govuk-form-group">
+          <label class="govuk-label govuk-label--s" for="question">
+            Question
+            <span class="govuk-hint">Write it the way a user would actually ask it.</span>
+          </label>
+          <textarea class="govuk-textarea" id="question" name="question" rows="4"
+                    placeholder="e.g. Does Camden have gaps in adult social care placements?"></textarea>
+        </div>
+
+        <div style="display:flex; gap:1rem; align-items:center; flex-wrap:wrap">
+          <button type="submit" class="govuk-button govuk-!-margin-bottom-0">Save question</button>
+          <a href="/staff/eval/annotate" class="govuk-link">Skip — show another FOI</a>
+        </div>
+      </form>
+
+      <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible govuk-!-margin-top-6">
+      <h3 class="govuk-heading-s">Tips</h3>
+      <ul class="govuk-list govuk-list--bullet govuk-!-font-size-16">
+        <li>Write the question as a member of the public or staff would phrase it.</li>
+        <li>Make sure the question is specifically answerable from this FOI.</li>
+        <li>If multiple FOIs together answer the question, add all their identifiers.</li>
+        <li>Avoid questions so broad they could match dozens of unrelated FOIs.</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

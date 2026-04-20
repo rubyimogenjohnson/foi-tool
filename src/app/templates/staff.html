@@ -1,0 +1,222 @@
+{% extends "base.html" %}
+
+{% block title %}FOI Staff Search — Camden Council{% endblock %}
+
+{% block service_header %}
+{# Secondary service bar — signals internal tool #}
+<div class="lbcamden-header lbcamden-header--site-navigation">
+  <div class="lbcamden-header__bar govuk-width-container">
+    <div class="lbcamden-header__title">
+      <a href="/staff" class="lbcamden-header__link">FOI Staff Search</a>
+    </div>
+    <nav class="lbcamden-header__navigation" aria-label="Staff navigation">
+      <ul class="lbcamden-header__navigation-list">
+        <li class="lbcamden-header__navigation-item">
+          <a class="lbcamden-header__navigation-item-link" href="/staff/eval">Evaluation</a>
+        </li>
+        <li class="lbcamden-header__navigation-item">
+          <a class="lbcamden-header__navigation-item-link" href="/staff/eval/annotate">Add questions</a>
+        </li>
+        <li class="lbcamden-header__navigation-item">
+          <a class="lbcamden-header__navigation-item-link" href="/staff/stats">Feedback stats</a>
+        </li>
+        <li class="lbcamden-header__navigation-item">
+          <a class="lbcamden-header__navigation-item-link" href="/">Public portal</a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</div>
+<div class="govuk-width-container">
+  <div class="govuk-phase-banner">
+    <p class="govuk-phase-banner__content">
+      <strong class="govuk-tag govuk-phase-banner__content__tag govuk-tag--blue">Internal</strong>
+      <span class="govuk-phase-banner__text">For Camden Council staff only</span>
+    </p>
+  </div>
+</div>
+{% endblock %}
+
+{% block content %}
+
+{# ── Page heading ─────────────────────────────────────────────── #}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <h1 class="govuk-heading-xl">What have we said before?</h1>
+    <p class="govuk-body-l">
+      Search past FOI responses before drafting a reply to a new request.
+      Results are ranked by relevance and recency — the most recent answers come first.
+    </p>
+  </div>
+</div>
+
+{# ── Search form ─────────────────────────────────────────────── #}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <form method="POST" action="/staff" autocomplete="off" novalidate>
+      <div class="govuk-form-group{% if error %} govuk-form-group--error{% endif %}">
+        <label class="govuk-label govuk-label--m" for="query">
+          Topic or question from the new FOI request
+        </label>
+        {% if error %}
+          <p id="query-error" class="govuk-error-message">
+            <span class="govuk-visually-hidden">Error:</span> {{ error }}
+          </p>
+        {% endif %}
+        <input
+          class="govuk-input{% if error %} govuk-input--error{% endif %}"
+          id="query"
+          name="query"
+          type="text"
+          value="{{ query | e }}"
+          placeholder="e.g. council tax arrears recovery process"
+          {% if error %}aria-describedby="query-error"{% endif %}
+          {% if not query %}autofocus{% endif %}
+        >
+      </div>
+      <button type="submit" class="lbcamden-button" id="foi-submit">Search</button>
+    </form>
+
+    <div id="foi-loading" class="foi-loading" hidden aria-live="polite" aria-atomic="true">
+      <div class="foi-loading__spinner" aria-hidden="true"></div>
+      <div>
+        <p class="govuk-body govuk-!-font-weight-bold foi-loading__step" id="foi-loading-step">Searching previous FOI responses&hellip;</p>
+        <p class="govuk-body-s foi-loading__hint" id="foi-loading-hint">This usually takes around 10&ndash;20 seconds.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var form = document.querySelector('form');
+  var loading = document.getElementById('foi-loading');
+  var stepEl = document.getElementById('foi-loading-step');
+  var hintEl = document.getElementById('foi-loading-hint');
+  var btn = document.getElementById('foi-submit');
+
+  var steps = [
+    { text: 'Searching previous FOI responses\u2026',  hint: 'Looking for responses that match this topic.' },
+    { text: 'Ranking by relevance and recency\u2026',  hint: 'Bringing the most recent answers to the top.' },
+    { text: 'Generating your briefing\u2026',           hint: 'An AI is summarising what Camden has previously said, with dates.' },
+  ];
+
+  form.addEventListener('submit', function () {
+    var query = document.getElementById('query');
+    if (!query || !query.value.trim()) return;
+    btn.setAttribute('disabled', 'true');
+    btn.classList.add('lbcamden-button--disabled');
+    loading.removeAttribute('hidden');
+    var i = 0;
+    setInterval(function () {
+      i = Math.min(i + 1, steps.length - 1);
+      stepEl.textContent = steps[i].text;
+      hintEl.textContent = steps[i].hint;
+    }, 3000);
+  });
+}());
+</script>
+
+{# ── Results ─────────────────────────────────────────────────── #}
+{% if answer %}
+<div class="govuk-grid-row foi-results">
+  <div class="govuk-grid-column-full">
+    <hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible">
+
+    <div class="govuk-tabs" data-module="govuk-tabs">
+      <h2 class="govuk-tabs__title">Results</h2>
+      <ul class="govuk-tabs__list">
+        <li class="govuk-tabs__list-item govuk-tabs__list-item--selected">
+          <a class="govuk-tabs__tab" href="#tab-summary">Summary</a>
+        </li>
+        <li class="govuk-tabs__list-item">
+          <a class="govuk-tabs__tab" href="#tab-sources">
+            Matching FOIs
+            <span class="foi-count-badge">{{ sources | length }}</span>
+          </a>
+        </li>
+      </ul>
+
+      {# ── Tab 1: AI summary ──────────────────────────────────── #}
+      <div class="govuk-tabs__panel" id="tab-summary">
+        <h2 class="govuk-heading-m">What we have previously said</h2>
+        <div class="lbcamden-prose foi-answer">
+          {{ answer | markdown }}
+        </div>
+
+        <div class="foi-feedback-widget govuk-!-margin-top-6" id="foi-feedback-widget">
+          <p class="govuk-body govuk-!-font-weight-bold">Did this answer your question?</p>
+          <div class="foi-feedback-buttons">
+            <button class="govuk-button govuk-button--secondary foi-vote-btn" data-vote="yes">Yes</button>
+            <button class="govuk-button govuk-button--secondary foi-vote-btn" data-vote="no">No</button>
+          </div>
+        </div>
+      </div>
+
+      {# ── Tab 2: Sources table ────────────────────────────────── #}
+      <div class="govuk-tabs__panel govuk-tabs__panel--hidden" id="tab-sources">
+        <h2 class="govuk-heading-m">Matching FOI responses</h2>
+        <p class="govuk-body-s">Sorted by relevance and recency. Most recently answered responses appear higher.</p>
+
+        <table class="govuk-table foi-staff-table">
+          <thead class="govuk-table__head">
+            <tr class="govuk-table__row">
+              <th scope="col" class="govuk-table__header">Reference</th>
+              <th scope="col" class="govuk-table__header">Subject</th>
+              <th scope="col" class="govuk-table__header">Date answered</th>
+              <th scope="col" class="govuk-table__header">Recency</th>
+              <th scope="col" class="govuk-table__header">Match</th>
+              <th scope="col" class="govuk-table__header">Response</th>
+            </tr>
+          </thead>
+          <tbody class="govuk-table__body">
+            {% for s in sources %}
+            <tr class="govuk-table__row{% if loop.first %} foi-top-row{% endif %}">
+              <td class="govuk-table__cell foi-cell-ref">{{ s.ref }}</td>
+              <td class="govuk-table__cell">{{ s.title }}</td>
+              <td class="govuk-table__cell foi-cell-date">{{ s.date }}</td>
+              <td class="govuk-table__cell">
+                {% if s.days_ago %}
+                  <strong class="govuk-tag {% if 'day' in s.days_ago or 'week' in s.days_ago or s.days_ago in ('today','yesterday') %}govuk-tag--green{% elif 'month' in s.days_ago %}govuk-tag--yellow{% else %}govuk-tag--grey{% endif %}">{{ s.days_ago }}</strong>
+                {% endif %}
+              </td>
+              <td class="govuk-table__cell foi-cell-score">
+                {{ "%.0f"|format(s.score * 100) }}%
+              </td>
+              <td class="govuk-table__cell">
+                {% if s.link %}
+                  <a href="{{ s.link }}" class="govuk-link" target="_blank" rel="noopener noreferrer">View</a>
+                {% else %}
+                  &mdash;
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+    </div>{# /govuk-tabs #}
+  </div>
+</div>
+
+<script>
+(function () {
+  var widget = document.getElementById('foi-feedback-widget');
+  if (!widget) return;
+  widget.querySelectorAll('.foi-vote-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      fetch('/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ vote: btn.dataset.vote, portal: 'staff', query: {{ query | tojson }} }),
+      });
+      widget.innerHTML = '<p class="govuk-body">Thank you for your feedback.</p>';
+    });
+  });
+}());
+</script>
+
+{% endif %}
+
+{% endblock %}

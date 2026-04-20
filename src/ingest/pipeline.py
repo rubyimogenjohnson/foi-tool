@@ -18,22 +18,34 @@ from __future__ import annotations
 
 import csv
 import sys
+from datetime import date, datetime
 from pathlib import Path
 
+from dotenv import load_dotenv
 from psycopg2.extras import execute_values
 
 from src.db import ensure_schema, get_conn
+
+load_dotenv()
 from .clean import clean
 from .chunk import chunk_text
 from .embed import embed, get_model
 
 DATA_DIR = Path(__file__).parents[2] / "data"
 BATCH_SIZE = 64
+YEARS = 3  # only ingest FOIs from the last N years
 
 
 def _load_csv(path: Path) -> list[dict]:
     with open(path, newline="", encoding="utf-8") as f:
         return list(csv.DictReader(f))
+
+
+def _parse_date(date_str: str) -> date | None:
+    try:
+        return datetime.strptime(date_str.strip(), "%d/%m/%Y").date()
+    except ValueError:
+        return None
 
 
 def run(csv_path: Path | None = None) -> None:
@@ -46,11 +58,19 @@ def run(csv_path: Path | None = None) -> None:
     records = _load_csv(csv_path)
     print(f"Loaded {len(records)} FOI records from {csv_path.name}")
 
+    cutoff = date.today().replace(year=date.today().year - YEARS)
+    records = [
+        r for r in records
+        if (d := _parse_date(r.get("Document Date", ""))) and d >= cutoff
+    ]
+    print(f"Filtered to {len(records)} records from the last {YEARS} years (since {cutoff})")
+
     print("Loading embedding model…")
     get_model()
 
-    conn = get_conn()
+    conn = get_conn(register=False)
     ensure_schema(conn)
+    conn.close()
 
     all_rows: list[tuple] = []
     skipped = 0
@@ -58,7 +78,7 @@ def run(csv_path: Path | None = None) -> None:
     for record in records:
         identifier = record["Identifier"].strip()
         title = record.get("Document Title", "").strip()
-        date = record.get("Document Date", "").strip()
+        date_str = record.get("Document Date", "").strip()
         link = record.get("Document Link", "").strip()
         raw_text = record.get("Document Text", "")
 
@@ -76,7 +96,7 @@ def run(csv_path: Path | None = None) -> None:
                 f"{identifier}_{i}",  # id
                 identifier,
                 title,
-                date,
+                date_str,
                 link,
                 i,             # chunk_index
                 total_chunks,
@@ -87,18 +107,19 @@ def run(csv_path: Path | None = None) -> None:
         print(f"Skipped {skipped} records with empty text after cleaning.")
     print(f"Embedding {len(all_rows)} chunks from {len(records) - skipped} records…")
 
-    with conn.cursor() as cur:
-        for start in range(0, len(all_rows), BATCH_SIZE):
-            batch = all_rows[start:start + BATCH_SIZE]
-            texts = [row[7] for row in batch]  # document column
-            embeddings = embed(texts)
+    for start in range(0, len(all_rows), BATCH_SIZE):
+        batch = all_rows[start:start + BATCH_SIZE]
+        texts = [row[7] for row in batch]  # document column
+        embeddings = embed(texts)
 
-            # Merge id + metadata + embedding into one tuple per row
-            rows_with_embeddings = [
-                (*row, embedding)
-                for row, embedding in zip(batch, embeddings)
-            ]
+        rows_with_embeddings = [
+            (*row, embedding)
+            for row, embedding in zip(batch, embeddings)
+        ]
 
+        # Fresh connection per batch — avoids Supabase pooler timeouts
+        conn = get_conn()
+        with conn.cursor() as cur:
             execute_values(
                 cur,
                 """
@@ -118,10 +139,10 @@ def run(csv_path: Path | None = None) -> None:
                 """,
                 rows_with_embeddings,
             )
-            conn.commit()
-            print(f"  {min(start + BATCH_SIZE, len(all_rows))}/{len(all_rows)} chunks upserted")
+        conn.commit()
+        conn.close()
+        print(f"  {min(start + BATCH_SIZE, len(all_rows))}/{len(all_rows)} chunks upserted")
 
-    conn.close()
     print("\nDone. Vector store written to PostgreSQL (foi_chunks).")
 
 

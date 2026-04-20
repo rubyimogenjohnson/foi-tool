@@ -1,0 +1,2 @@
+Type: str
+Value: 'According to CAM10600 (01 January 2024), Camden does not currently have gaps in adult social care placements.'

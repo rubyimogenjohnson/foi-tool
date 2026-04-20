@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+
+{% block title %}FOI Search — Camden Council{% endblock %}
+
+{% block service_header %}
+<div class="govuk-width-container">
+  <div class="govuk-phase-banner">
+    <p class="govuk-phase-banner__content">
+      <strong class="govuk-tag govuk-phase-banner__content__tag">Beta</strong>
+      <span class="govuk-phase-banner__text">Freedom of Information Search</span>
+    </p>
+    <a href="/staff" class="govuk-link govuk-body-s foi-staff-link">Camden staff? Use the internal search</a>
+  </div>
+</div>
+{% endblock %}
+
+{% block content %}
+
+{# ── Page heading ─────────────────────────────────────────────── #}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <h1 class="govuk-heading-xl">Search Camden's FOI responses</h1>
+    <p class="govuk-body-l">
+      Find out whether Camden Council has already answered a question like yours.
+      Search thousands of past Freedom of Information responses in plain English.
+    </p>
+  </div>
+</div>
+
+{# ── Search form ─────────────────────────────────────────────── #}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <form method="POST" action="/" autocomplete="off" novalidate>
+      <div class="govuk-form-group{% if error %} govuk-form-group--error{% endif %}">
+        <label class="govuk-label govuk-label--m" for="query">
+          What would you like to know?
+        </label>
+        {% if error %}
+          <p id="query-error" class="govuk-error-message">
+            <span class="govuk-visually-hidden">Error:</span> {{ error }}
+          </p>
+        {% endif %}
+        <input
+          class="govuk-input{% if error %} govuk-input--error{% endif %}"
+          id="query"
+          name="query"
+          type="text"
+          value="{{ query | e }}"
+          placeholder="e.g. How many looked-after children does Camden have?"
+          {% if error %}aria-describedby="query-error"{% endif %}
+          {% if not query %}autofocus{% endif %}
+        >
+      </div>
+      <button type="submit" class="lbcamden-button" id="foi-submit">Search</button>
+    </form>
+
+    <div id="foi-loading" class="foi-loading" hidden aria-live="polite" aria-atomic="true">
+      <div class="foi-loading__spinner" aria-hidden="true"></div>
+      <div>
+        <p class="govuk-body govuk-!-font-weight-bold foi-loading__step" id="foi-loading-step">Searching FOI records&hellip;</p>
+        <p class="govuk-body-s foi-loading__hint" id="foi-loading-hint">This usually takes around 10&ndash;20 seconds.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var form = document.querySelector('form');
+  var loading = document.getElementById('foi-loading');
+  var stepEl = document.getElementById('foi-loading-step');
+  var hintEl = document.getElementById('foi-loading-hint');
+  var btn = document.getElementById('foi-submit');
+
+  var steps = [
+    { text: 'Searching FOI records\u2026',           hint: 'Looking for responses that match your question.' },
+    { text: 'Finding the most relevant responses\u2026', hint: 'Prioritising the most recent answers.' },
+    { text: 'Generating your summary\u2026',          hint: 'An AI is reading the matching responses and writing a plain-English answer.' },
+  ];
+
+  form.addEventListener('submit', function () {
+    var query = document.getElementById('query');
+    if (!query || !query.value.trim()) return;
+    btn.setAttribute('disabled', 'true');
+    btn.classList.add('lbcamden-button--disabled');
+    loading.removeAttribute('hidden');
+    var i = 0;
+    setInterval(function () {
+      i = Math.min(i + 1, steps.length - 1);
+      stepEl.textContent = steps[i].text;
+      hintEl.textContent = steps[i].hint;
+    }, 3000);
+  });
+}());
+</script>
+
+{# ── Results ─────────────────────────────────────────────────── #}
+{% if answer %}
+<div class="govuk-grid-row foi-results" id="foi-results">
+  <div class="govuk-grid-column-full">
+    <hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible">
+  </div>
+
+  {# Answer #}
+  <div class="govuk-grid-column-two-thirds">
+    <h2 class="govuk-heading-l">Summary</h2>
+    <div class="lbcamden-prose foi-answer">
+      {{ answer | markdown }}
+    </div>
+  </div>
+
+  {# Sources #}
+  <div class="govuk-grid-column-full">
+    <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
+    <h2 class="govuk-heading-m">Source FOI responses</h2>
+    <p class="govuk-body-s govuk-!-color-secondary-text-on-light">
+      These are the past responses most relevant to your question, prioritising the most recent.
+    </p>
+  </div>
+
+  {% for s in sources %}
+  <div class="govuk-grid-column-one-third">
+    <div class="foi-source-card">
+      <p class="govuk-body-s foi-source-ref">
+        <strong>{{ s.ref }}</strong>
+        {% if s.days_ago %}
+          <strong class="govuk-tag {% if 'day' in s.days_ago or 'week' in s.days_ago or s.days_ago in ('today','yesterday') %}govuk-tag--green{% elif 'month' in s.days_ago %}govuk-tag--yellow{% else %}govuk-tag--grey{% endif %} foi-recency-tag">{{ s.days_ago }}</strong>
+        {% endif %}
+      </p>
+      <p class="govuk-body-s">{{ s.date }}</p>
+      <p class="govuk-body-s foi-source-title">{{ s.title }}</p>
+      {% if s.link %}
+        <a href="{{ s.link }}" class="govuk-link govuk-body-s" target="_blank" rel="noopener noreferrer">
+          View full response
+        </a>
+      {% endif %}
+    </div>
+  </div>
+  {% endfor %}
+
+  <div class="govuk-grid-column-full">
+    <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
+    <p class="govuk-body-s">
+      These summaries are generated automatically from past FOI responses. Always read
+      the full response before relying on this information. If your question is not covered,
+      you can <a href="https://www.camden.gov.uk/freedom-of-information" class="govuk-link">submit a new FOI request</a>.
+    </p>
+  </div>
+
+  <div class="govuk-grid-column-two-thirds">
+    <div class="foi-feedback-widget" id="foi-feedback-widget">
+      <p class="govuk-body govuk-!-font-weight-bold" id="foi-feedback-question">Did this answer your question?</p>
+      <div class="foi-feedback-buttons">
+        <button class="govuk-button govuk-button--secondary foi-vote-btn" data-vote="yes">Yes</button>
+        <button class="govuk-button govuk-button--secondary foi-vote-btn" data-vote="no">No</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function () {
+  var widget = document.getElementById('foi-feedback-widget');
+  if (!widget) return;
+  widget.querySelectorAll('.foi-vote-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      fetch('/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ vote: btn.dataset.vote, portal: 'public', query: {{ query | tojson }} }),
+      });
+      widget.innerHTML = '<p class="govuk-body">Thank you for your feedback.</p>';
+    });
+  });
+}());
+</script>
+
+<script>
+  document.getElementById('foi-results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+</script>
+{% endif %}
+
+{% if not query %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible">
+    <h2 class="govuk-heading-m">About this service</h2>
+    <p class="govuk-body">
+      Camden Council publishes responses to Freedom of Information requests.
+      Use this tool to search past responses and find out if your question has already been answered.
+    </p>
+    <p class="govuk-body">
+      If you cannot find what you need, you can
+      <a href="https://www.camden.gov.uk/freedom-of-information" class="govuk-link">submit a new FOI request</a>.
+    </p>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}

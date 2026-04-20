@@ -11,11 +11,31 @@ default of 40, with negligible latency cost at this dataset size.
 
 from __future__ import annotations
 
+from datetime import date, datetime
+
 from src.db import get_conn
 from src.ingest.embed import embed
 
+_RECENCY_WINDOW_DAYS = 1095  # 3 years — FOIs outside this window score 0 on recency
 
-def search(query: str, top_k: int = 5) -> list[dict]:
+
+def _parse_date(date_str: str) -> date | None:
+    try:
+        return datetime.strptime(date_str.strip(), "%d/%m/%Y").date()
+    except (ValueError, AttributeError):
+        return None
+
+
+def _recency_score(date_str: str) -> float:
+    """0–1 score: 1.0 = today, 0.0 = >= 3 years ago."""
+    d = _parse_date(date_str)
+    if d is None:
+        return 0.0
+    days_ago = (date.today() - d).days
+    return max(0.0, 1.0 - days_ago / _RECENCY_WINDOW_DAYS)
+
+
+def search(query: str, top_k: int = 5, recency_boost: float = 0.0) -> list[dict]:
     """
     Embed *query*, retrieve matching chunks, and return one result per FOI.
 
@@ -25,9 +45,16 @@ def search(query: str, top_k: int = 5) -> list[dict]:
         date        — document date string
         link        — URL to the full response / attachments zip
         excerpt     — the best-matching chunk text (title prepended)
-        score       — cosine similarity 0–1 (higher is better)
+        score       — relevance score 0–1 (higher is better)
+
+    recency_boost: weight (0–1) given to date recency vs. semantic similarity.
+        0.0  — pure semantic search (default, used by public portal)
+        0.35 — blended ranking used by staff portal to surface latest FOIs
     """
     conn = get_conn()
+
+    # With a recency boost we need more candidates before re-ranking
+    n_over_fetch = top_k * 8 if recency_boost > 0 else top_k * 3
 
     try:
         with conn.cursor() as cur:
@@ -43,8 +70,7 @@ def search(query: str, top_k: int = 5) -> list[dict]:
         with conn.cursor() as cur:
             cur.execute("SET hnsw.ef_search = 100")
 
-            # Over-fetch so deduplication has enough candidates
-            n_fetch = min(top_k * 3, total)
+            n_fetch = min(n_over_fetch, total)
 
             cur.execute(
                 """
@@ -66,24 +92,37 @@ def search(query: str, top_k: int = 5) -> list[dict]:
     finally:
         conn.close()
 
-    hits: list[dict] = []
-    seen: set[str] = set()
+    # Deduplicate by identifier, keeping the highest semantic score per FOI
+    seen: dict[str, dict] = {}
+    for identifier, title, date_str, link, document, score in rows:
+        sem_score = float(score)
+        if identifier not in seen or sem_score > seen[identifier]["_sem"]:
+            seen[identifier] = {
+                "identifier": identifier,
+                "title": title,
+                "date": date_str,
+                "link": link,
+                "excerpt": document,
+                "_sem": sem_score,
+            }
 
-    for identifier, title, date, link, document, score in rows:
-        if identifier in seen:
-            continue  # already have the best chunk for this FOI
-        seen.add(identifier)
+    candidates = list(seen.values())
 
-        hits.append({
-            "identifier": identifier,
-            "title": title,
-            "date": date,
-            "link": link,
-            "excerpt": document,
-            "score": round(float(score), 4),
-        })
+    if recency_boost > 0:
+        sem_weight = 1.0 - recency_boost
+        for c in candidates:
+            c["score"] = round(
+                sem_weight * c["_sem"] + recency_boost * _recency_score(c["date"]),
+                4,
+            )
+        candidates.sort(key=lambda c: c["score"], reverse=True)
+    else:
+        for c in candidates:
+            c["score"] = round(c["_sem"], 4)
+        candidates.sort(key=lambda c: c["score"], reverse=True)
 
-        if len(hits) >= top_k:
-            break
+    # Strip the internal key before returning
+    for c in candidates:
+        del c["_sem"]
 
-    return hits
+    return candidates[:top_k]

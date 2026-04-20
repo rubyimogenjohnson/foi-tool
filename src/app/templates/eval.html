@@ -1,0 +1,371 @@
+{% extends "base.html" %}
+
+{% block title %}Retrieval Evaluation — Camden FOI{% endblock %}
+
+{% block service_header %}
+<div class="lbcamden-header lbcamden-header--site-navigation">
+  <div class="lbcamden-header__bar govuk-width-container">
+    <div class="lbcamden-header__title">
+      <a href="/staff" class="lbcamden-header__link">FOI Staff Search</a>
+    </div>
+    <nav class="lbcamden-header__navigation" aria-label="Staff navigation">
+      <ul class="lbcamden-header__navigation-list">
+        <li class="lbcamden-header__navigation-item lbcamden-header__navigation-item--active">
+          <a class="lbcamden-header__navigation-item-link" href="/staff/eval">Evaluation</a>
+        </li>
+        <li class="lbcamden-header__navigation-item">
+          <a class="lbcamden-header__navigation-item-link" href="/staff/eval/annotate">Add questions</a>
+        </li>
+        <li class="lbcamden-header__navigation-item">
+          <a class="lbcamden-header__navigation-item-link" href="/staff/stats">Feedback stats</a>
+        </li>
+        <li class="lbcamden-header__navigation-item">
+          <a class="lbcamden-header__navigation-item-link" href="/">Public portal</a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</div>
+<div class="govuk-width-container">
+  <div class="govuk-phase-banner">
+    <p class="govuk-phase-banner__content">
+      <strong class="govuk-tag govuk-phase-banner__content__tag govuk-tag--blue">Internal</strong>
+      <span class="govuk-phase-banner__text">For Camden Council staff only</span>
+    </p>
+  </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<script src="https://cdn.jsdelivr.net/npm/hammerjs@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2"></script>
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-full">
+    <h1 class="govuk-heading-xl">Retrieval evaluation</h1>
+    <p class="govuk-body">
+      Measures how well the vector search surfaces the correct FOI within the top K results,
+      across {{ n_questions }} ground-truth questions.
+    </p>
+  </div>
+</div>
+
+{# ── Run form ────────────────────────────────────────────────────── #}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-one-third">
+    <form method="POST" action="/staff/eval/run">
+      <div class="govuk-form-group">
+        <label class="govuk-label" for="max_k">
+          Max K <span class="govuk-body-s">(results to fetch, 1–50)</span>
+        </label>
+        <input class="govuk-input govuk-input--width-4" id="max_k" name="max_k"
+               type="number" min="1" max="50" value="{{ default_max_k }}">
+      </div>
+      <button type="submit" class="govuk-button" data-module="govuk-button">
+        Run evaluation
+      </button>
+    </form>
+    <p class="govuk-body-s govuk-!-color-secondary-text-on-light">
+      Searches {{ n_questions }} questions at every K from 1 to max K. Takes about a minute.
+      &nbsp;&middot;&nbsp;<a href="/staff/eval/annotate" class="govuk-link">Add questions to dataset</a>
+    </p>
+  </div>
+</div>
+
+{# ── History table ───────────────────────────────────────────────── #}
+{% if runs %}
+<div class="govuk-grid-row govuk-!-margin-top-4">
+  <div class="govuk-grid-column-full">
+    <h2 class="govuk-heading-m">Evaluation history</h2>
+    <table class="govuk-table">
+      <thead class="govuk-table__head">
+        <tr class="govuk-table__row">
+          <th class="govuk-table__header" scope="col">Run</th>
+          <th class="govuk-table__header" scope="col">Timestamp</th>
+          <th class="govuk-table__header" scope="col">Max K</th>
+          <th class="govuk-table__header" scope="col">Questions</th>
+          <th class="govuk-table__header" scope="col">Hit rate</th>
+          <th class="govuk-table__header" scope="col">Precision</th>
+          <th class="govuk-table__header" scope="col">Recall</th>
+          <th class="govuk-table__header" scope="col">MRR</th>
+          <th class="govuk-table__header" scope="col">Mean rank</th>
+        </tr>
+      </thead>
+      <tbody class="govuk-table__body">
+        {% for run in runs %}
+        {% set m = run.metrics %}
+        <tr class="govuk-table__row{% if selected and run.id == selected.id %} govuk-table__row--selected{% endif %}">
+          <td class="govuk-table__cell">
+            <a href="/staff/eval?run={{ run.id }}" class="govuk-link">{{ run.id }}</a>
+          </td>
+          <td class="govuk-table__cell govuk-!-font-size-14">{{ run.timestamp }}</td>
+          <td class="govuk-table__cell">{{ run.max_k }}</td>
+          <td class="govuk-table__cell">{{ run.n_questions }}</td>
+          <td class="govuk-table__cell">{{ "%.1f"|format(m.hit_rate * 100) }}%</td>
+          <td class="govuk-table__cell">{{ "%.3f"|format(m.mean_precision) }}</td>
+          <td class="govuk-table__cell">{{ "%.3f"|format(m.mean_recall) }}</td>
+          <td class="govuk-table__cell">{{ "%.3f"|format(m.mrr) }}</td>
+          <td class="govuk-table__cell">
+            {% if m.mean_rank is not none %}{{ "%.1f"|format(m.mean_rank) }}{% else %}N/A{% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+{# ── Selected run detail ─────────────────────────────────────────── #}
+{% if not runs %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <div class="govuk-inset-text">
+        No runs yet. Set a max K above and press <strong>Run evaluation</strong> to start.
+      </div>
+    </div>
+  </div>
+{% else %}
+{% set m = selected.metrics %}
+
+<div class="govuk-grid-row govuk-!-margin-top-2">
+  <div class="govuk-grid-column-full">
+    <h2 class="govuk-heading-m">
+      Run {{ selected.id }}
+      <span class="govuk-body-s govuk-!-color-secondary-text-on-light">
+        — {{ selected.timestamp }}, max K = {{ selected.max_k }}, {{ selected.n_questions }} questions
+      </span>
+    </h2>
+
+    {# Headline metrics #}
+    <dl class="govuk-summary-list">
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Hit rate</dt>
+        <dd class="govuk-summary-list__value">
+          <strong>{{ "%.1f"|format(m.hit_rate * 100) }}%</strong>
+          <span class="govuk-body-s"> — at least one relevant FOI in top {{ selected.max_k }}</span>
+        </dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Precision@{{ selected.max_k }}</dt>
+        <dd class="govuk-summary-list__value">
+          <strong>{{ "%.3f"|format(m.mean_precision) }}</strong>
+          <span class="govuk-body-s"> — relevant results as a fraction of {{ selected.max_k }} returned</span>
+        </dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Recall@{{ selected.max_k }}</dt>
+        <dd class="govuk-summary-list__value">
+          <strong>{{ "%.3f"|format(m.mean_recall) }}</strong>
+          <span class="govuk-body-s"> — fraction of relevant FOIs captured in top {{ selected.max_k }}</span>
+        </dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">MRR</dt>
+        <dd class="govuk-summary-list__value">
+          <strong>{{ "%.3f"|format(m.mrr) }}</strong>
+          <span class="govuk-body-s"> — mean reciprocal rank of first relevant result</span>
+        </dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Mean rank</dt>
+        <dd class="govuk-summary-list__value">
+          {% if m.mean_rank is not none %}
+            <strong>{{ "%.1f"|format(m.mean_rank) }}</strong>
+            <span class="govuk-body-s"> — average position of first relevant result</span>
+          {% else %}
+            <strong>N/A</strong>
+          {% endif %}
+        </dd>
+      </div>
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Found rate</dt>
+        <dd class="govuk-summary-list__value">
+          <strong>{{ "%.1f"|format(m.found_rate * 100) }}%</strong>
+          <span class="govuk-body-s"> — queries with any relevant result in top {{ selected.max_k }}</span>
+        </dd>
+      </div>
+    </dl>
+
+    {# Charts #}
+    <h2 class="govuk-heading-m govuk-!-margin-top-6">Precision, Recall and Hit Rate vs K</h2>
+    <p class="govuk-body-s govuk-!-color-secondary-text-on-light">Scroll to zoom · drag to pan</p>
+    <button id="resetPrh" class="govuk-button govuk-button--secondary govuk-!-font-size-14" style="padding:2px 10px">Reset zoom</button>
+    <canvas id="prhChart" height="90"></canvas>
+
+    <h2 class="govuk-heading-m govuk-!-margin-top-6">MRR vs K</h2>
+    <p class="govuk-body-s govuk-!-color-secondary-text-on-light">Scroll to zoom · drag to pan</p>
+    <button id="resetMrr" class="govuk-button govuk-button--secondary govuk-!-font-size-14" style="padding:2px 10px">Reset zoom</button>
+    <canvas id="mrrChart" height="60"></canvas>
+
+    <h2 class="govuk-heading-m govuk-!-margin-top-6">Rank distribution (K = {{ selected.max_k }})</h2>
+    <p class="govuk-body-s govuk-!-color-secondary-text-on-light">Position of the first relevant result for each question. Scroll to zoom · drag to pan</p>
+    <button id="resetRank" class="govuk-button govuk-button--secondary govuk-!-font-size-14" style="padding:2px 10px">Reset zoom</button>
+    <canvas id="rankChart" height="60"></canvas>
+
+    {# Per-question table #}
+    <h2 class="govuk-heading-m govuk-!-margin-top-6">Per-question results (K = {{ selected.max_k }})</h2>
+    <table class="govuk-table">
+      <thead class="govuk-table__head">
+        <tr class="govuk-table__row">
+          <th class="govuk-table__header" scope="col">ID</th>
+          <th class="govuk-table__header" scope="col">Question</th>
+          <th class="govuk-table__header" scope="col">Relevant IDs</th>
+          <th class="govuk-table__header" scope="col">Hit</th>
+          <th class="govuk-table__header" scope="col">Rank</th>
+          <th class="govuk-table__header" scope="col">Precision</th>
+          <th class="govuk-table__header" scope="col">Recall</th>
+          <th class="govuk-table__header" scope="col">RR</th>
+          <th class="govuk-table__header" scope="col">Model response</th>
+        </tr>
+      </thead>
+      <tbody class="govuk-table__body">
+        {% for r in selected.per_question %}
+        <tr class="govuk-table__row">
+          <td class="govuk-table__cell govuk-!-font-size-14">{{ r.id }}</td>
+          <td class="govuk-table__cell govuk-!-font-size-14">{{ r.question }}</td>
+          <td class="govuk-table__cell govuk-!-font-size-14">{{ r.relevant_identifiers | join(", ") }}</td>
+          <td class="govuk-table__cell">
+            {% if r.hit %}
+              <strong class="govuk-tag govuk-tag--green">yes</strong>
+            {% else %}
+              <strong class="govuk-tag govuk-tag--red">no</strong>
+            {% endif %}
+          </td>
+          <td class="govuk-table__cell govuk-!-font-size-14">
+            {% if r.rank is not none %}{{ r.rank }}{% else %}—{% endif %}
+          </td>
+          <td class="govuk-table__cell govuk-!-font-size-14">{{ "%.3f"|format(r.precision) }}</td>
+          <td class="govuk-table__cell govuk-!-font-size-14">{{ "%.3f"|format(r.recall) }}</td>
+          <td class="govuk-table__cell govuk-!-font-size-14">{{ "%.3f"|format(r.reciprocal_rank) }}</td>
+          <td class="govuk-table__cell govuk-!-font-size-14" style="min-width:260px;max-width:380px">
+            {% if r.llm_answer %}
+              <details class="govuk-details govuk-!-margin-bottom-0">
+                <summary class="govuk-details__summary">
+                  <span class="govuk-details__summary-text">
+                    {{ r.llm_answer[:80] }}{% if r.llm_answer|length > 80 %}…{% endif %}
+                  </span>
+                </summary>
+                <div class="govuk-details__text govuk-!-font-size-14" style="white-space:pre-wrap">{{ r.llm_answer }}</div>
+              </details>
+            {% else %}
+              <span class="govuk-!-color-secondary-text-on-light">—</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+  </div>
+</div>
+
+<script>
+(function () {
+  const sweep    = {{ sweep_json | safe }};
+  const rankDist = {{ rank_dist_json | safe }};
+  const gridColor = "rgba(0,0,0,0.06)";
+
+  const zoomPlugin = {
+    zoom: {
+      wheel: { enabled: true },
+      pinch: { enabled: true },
+      mode: "xy",
+    },
+    pan: {
+      enabled: true,
+      mode: "xy",
+    },
+  };
+
+  const lineOptions = (yLabel) => ({
+    responsive: true,
+    interaction: { mode: "index", intersect: false },
+    plugins: {
+      legend: { position: "top" },
+      tooltip: {
+        callbacks: {
+          label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(3)}`,
+        },
+      },
+      zoom: zoomPlugin,
+    },
+    scales: {
+      x: {
+        grid: { color: gridColor },
+        title: { display: true, text: "K (number of results)" },
+      },
+      y: {
+        grid: { color: gridColor },
+        min: 0, max: 1,
+        title: { display: !!yLabel, text: yLabel || "" },
+      },
+    },
+  });
+
+  const prhChart = new Chart(document.getElementById("prhChart"), {
+    type: "line",
+    data: {
+      labels: sweep.k,
+      datasets: [
+        { label: "Precision@K", data: sweep.precision, borderColor: "#1d70b8", backgroundColor: "transparent", pointRadius: 4, pointHoverRadius: 6, tension: 0.2 },
+        { label: "Recall@K",    data: sweep.recall,    borderColor: "#00703c", backgroundColor: "transparent", pointRadius: 4, pointHoverRadius: 6, tension: 0.2 },
+        { label: "Hit Rate@K",  data: sweep.hit_rate,  borderColor: "#f47738", backgroundColor: "transparent", pointRadius: 4, pointHoverRadius: 6, tension: 0.2 },
+      ],
+    },
+    options: lineOptions("Score"),
+  });
+
+  const mrrChart = new Chart(document.getElementById("mrrChart"), {
+    type: "line",
+    data: {
+      labels: sweep.k,
+      datasets: [
+        { label: "MRR", data: sweep.mrr, borderColor: "#912b88", backgroundColor: "transparent", pointRadius: 4, pointHoverRadius: 6, tension: 0.2 },
+      ],
+    },
+    options: lineOptions("MRR"),
+  });
+
+  const rankChart = new Chart(document.getElementById("rankChart"), {
+    type: "bar",
+    data: {
+      labels: rankDist.labels,
+      datasets: [{
+        label: "Questions",
+        data: rankDist.counts,
+        backgroundColor: rankDist.labels.map(l => l === "not found" ? "#d4351c" : "#1d70b8"),
+        hoverBackgroundColor: rankDist.labels.map(l => l === "not found" ? "#aa2a15" : "#14467a"),
+      }],
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => `${ctx.parsed.y} question${ctx.parsed.y !== 1 ? "s" : ""}` } },
+        zoom: zoomPlugin,
+      },
+      scales: {
+        x: { grid: { color: gridColor }, title: { display: true, text: "Rank of first relevant result" } },
+        y: { grid: { color: gridColor }, ticks: { stepSize: 1 }, title: { display: true, text: "Number of questions" } },
+      },
+    },
+  });
+
+  // Reset zoom buttons
+  document.getElementById("resetPrh").addEventListener("click",  () => prhChart.resetZoom());
+  document.getElementById("resetMrr").addEventListener("click",  () => mrrChart.resetZoom());
+  document.getElementById("resetRank").addEventListener("click", () => rankChart.resetZoom());
+})();
+</script>
+
+{% endif %}{# runs #}
+
+<p class="govuk-body-s govuk-!-margin-top-6">
+  <a href="/staff" class="govuk-link">&larr; Back to staff search</a>
+  &nbsp;&middot;&nbsp;
+  <a href="/staff/stats" class="govuk-link">Feedback stats</a>
+</p>
+
+{% endblock %}

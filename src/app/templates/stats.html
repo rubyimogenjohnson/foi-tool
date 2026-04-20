@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}Feedback Stats — Camden FOI{% endblock %}
+
+{% block service_header %}
+<div class="lbcamden-header lbcamden-header--site-navigation">
+  <div class="lbcamden-header__bar govuk-width-container">
+    <div class="lbcamden-header__title">
+      <a href="/staff" class="lbcamden-header__link">FOI Staff Search</a>
+    </div>
+    <nav class="lbcamden-header__navigation" aria-label="Staff navigation">
+      <ul class="lbcamden-header__navigation-list">
+        <li class="lbcamden-header__navigation-item">
+          <a class="lbcamden-header__navigation-item-link" href="/staff/eval">Evaluation</a>
+        </li>
+        <li class="lbcamden-header__navigation-item">
+          <a class="lbcamden-header__navigation-item-link" href="/staff/eval/annotate">Add questions</a>
+        </li>
+        <li class="lbcamden-header__navigation-item lbcamden-header__navigation-item--active">
+          <a class="lbcamden-header__navigation-item-link" href="/staff/stats">Feedback stats</a>
+        </li>
+        <li class="lbcamden-header__navigation-item">
+          <a class="lbcamden-header__navigation-item-link" href="/">Public portal</a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</div>
+<div class="govuk-width-container">
+  <div class="govuk-phase-banner">
+    <p class="govuk-phase-banner__content">
+      <strong class="govuk-tag govuk-phase-banner__content__tag govuk-tag--blue">Internal</strong>
+      <span class="govuk-phase-banner__text">For Camden Council staff only</span>
+    </p>
+  </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+
+    <h1 class="govuk-heading-xl">Feedback stats</h1>
+    <p class="govuk-body">How many users said the search answered their question.</p>
+
+    {% for portal in ['public', 'staff'] %}
+      {% set p = stats.get(portal, {}) %}
+      {% set yes = p.get('yes', {}) %}
+      {% set no  = p.get('no',  {}) %}
+      {% set total_yes = yes.get('total', 0) %}
+      {% set total_no  = no.get('total', 0) %}
+      {% set grand_total = total_yes + total_no %}
+
+      <h2 class="govuk-heading-m">{{ portal | capitalize }} portal</h2>
+
+      {% if grand_total == 0 %}
+        <p class="govuk-body govuk-!-color-secondary-text-on-light">No feedback recorded yet.</p>
+      {% else %}
+        <table class="govuk-table">
+          <thead class="govuk-table__head">
+            <tr class="govuk-table__row">
+              <th class="govuk-table__header" scope="col"></th>
+              <th class="govuk-table__header" scope="col">All time</th>
+              <th class="govuk-table__header" scope="col">Last 30 days</th>
+              <th class="govuk-table__header" scope="col">Last 7 days</th>
+            </tr>
+          </thead>
+          <tbody class="govuk-table__body">
+            <tr class="govuk-table__row">
+              <th class="govuk-table__header" scope="row">
+                <strong class="govuk-tag govuk-tag--green">Yes</strong>
+              </th>
+              <td class="govuk-table__cell">{{ total_yes }}</td>
+              <td class="govuk-table__cell">{{ yes.get('last_30_days', 0) }}</td>
+              <td class="govuk-table__cell">{{ yes.get('last_7_days', 0) }}</td>
+            </tr>
+            <tr class="govuk-table__row">
+              <th class="govuk-table__header" scope="row">
+                <strong class="govuk-tag govuk-tag--red">No</strong>
+              </th>
+              <td class="govuk-table__cell">{{ total_no }}</td>
+              <td class="govuk-table__cell">{{ no.get('last_30_days', 0) }}</td>
+              <td class="govuk-table__cell">{{ no.get('last_7_days', 0) }}</td>
+            </tr>
+            <tr class="govuk-table__row">
+              <th class="govuk-table__header" scope="row">Satisfaction rate</th>
+              <td class="govuk-table__cell" colspan="3">
+                {% if grand_total > 0 %}
+                  <strong>{{ "%.0f"|format(total_yes / grand_total * 100) }}%</strong>
+                  <span class="govuk-body-s"> ({{ total_yes }} of {{ grand_total }} responses)</span>
+                {% endif %}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      {% endif %}
+    {% endfor %}
+
+    <p class="govuk-body-s">
+      <a href="/staff" class="govuk-link">&larr; Back to staff search</a>
+    </p>
+
+  </div>
+</div>
+{% endblock %}

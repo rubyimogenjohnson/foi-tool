@@ -1,68 +1,82 @@
 # FOI Tool — Architecture
 
-## Overview
-
-The tool has two distinct flows: an **ingest pipeline** (run once to populate the vector store) and a **query flow** (run on every user request via the Streamlit app).
-
----
-
-## Ingest Pipeline
-
 ```mermaid
 flowchart TD
     CSV["📄 Camden FOI CSV\ndata/*.csv"]
 
-    subgraph ingest["Ingest Pipeline (src/ingest/)"]
-        LOAD["Load rows\npipeline.py"]
-        CLEAN["clean.py\nStrip header / address block / footer\nFix unicode encoding"]
-        CHUNK["chunk.py\nSplit on paragraph boundaries\n800-char chunks, 150-char overlap"]
-        EMBED["embed.py\nall-MiniLM-L6-v2\n384-dim embeddings\n(batches of 64)"]
-        UPSERT["Upsert to ChromaDB\ncollection: foi_chunks\ncosine similarity space"]
+    subgraph ingest["Ingest pipeline — src/ingest/"]
+        CLEAN["clean.py\nStrip boilerplate · fix encoding"]
+        CHUNK["chunk.py\n800-char overlapping chunks\n150-char overlap"]
+        EMBED_I["embed.py\nall-MiniLM-L6-v2\n384-dim vectors · batches of 64"]
+        UPSERT["pipeline.py\nUpsert to PostgreSQL\nON CONFLICT DO UPDATE"]
     end
 
-    CHROMA[("🗄️ ChromaDB\nchroma_db/")]
+    DB[("🗄️ PostgreSQL + pgvector\nfoi_chunks — HNSW cosine index\nfoi_feedback — user votes")]
 
-    CSV --> LOAD --> CLEAN --> CHUNK --> EMBED --> UPSERT --> CHROMA
+    subgraph flask["Flask app — src/app/flask_app.py"]
+
+        subgraph public["Public portal  /"]
+            PQ["User question"]
+            PS["search.py\ntop 5 FOIs · no recency boost"]
+            PL["Claude Haiku\npublic system prompt"]
+            PA["Answer + source cards"]
+        end
+
+        subgraph staff["Staff portal  /staff"]
+            SQ["Staff question"]
+            SS["search.py\ntop 8 FOIs · +40%% recency boost"]
+            SL["Claude Haiku\nstaff system prompt"]
+            SA["Answer + sources table\n(tabs)"]
+        end
+
+        FB["Feedback widget\n👍 / 👎 stored in foi_feedback"]
+        STATS["Feedback stats  /staff/stats"]
+    end
+
+    subgraph annotation["Annotation  /staff/eval/annotate"]
+        RAND["Random FOI from DB"]
+        HUMAN["Human reviewer\nwrites question"]
+        EQ["eval_questions.json\nground-truth Q&A pairs"]
+    end
+
+    subgraph evaluation["Evaluation  /staff/eval"]
+        SWEEP["run_eval_sweep()\nSearch at every K = 1…20"]
+        EVAL_LLM["Claude Haiku\nper-question answer"]
+        METRICS["Precision@K · Recall@K\nHit Rate · MRR · Mean Rank"]
+        RUNS["eval_runs.json\nhistorical run log"]
+        DASH["Eval dashboard\ninteractive charts + per-question table"]
+    end
+
+    %% Ingest flow
+    CSV --> CLEAN --> CHUNK --> EMBED_I --> UPSERT --> DB
+
+    %% Public portal flow
+    PQ --> PS
+    DB -->|"HNSW cosine search"| PS
+    PS --> PL --> PA
+    PA --> FB --> DB
+
+    %% Staff portal flow
+    SQ --> SS
+    DB -->|"HNSW cosine search"| SS
+    SS --> SL --> SA
+    SA --> FB
+    DB --> STATS
+
+    %% Annotation flow
+    DB -->|"ORDER BY RANDOM()"| RAND --> HUMAN --> EQ
+
+    %% Evaluation flow
+    EQ --> SWEEP
+    DB -->|"HNSW cosine search"| SWEEP
+    SWEEP --> METRICS
+    SWEEP --> EVAL_LLM
+    METRICS --> RUNS
+    EVAL_LLM --> RUNS
+    RUNS --> DASH
 ```
 
-Each chunk is stored with metadata: `identifier`, `title`, `date`, `link`, `chunk_index`, `total_chunks`. The pipeline is idempotent — re-running overwrites existing chunks by ID.
-
----
-
-## Query Flow
-
-```mermaid
-flowchart TD
-    USER["👤 User\nenters a question"]
-
-    subgraph app["Streamlit App (src/app/main.py)"]
-        INPUT["Text input"]
-    end
-
-    subgraph retrieval["Retrieval (src/retrieval/)"]
-        SEMBED["embed.py\nEmbed query\nall-MiniLM-L6-v2"]
-        SEARCH["search.py\nFetch top_k × 3 chunks\nfrom ChromaDB\nDeduplicate by FOI identifier\n→ top 5 unique FOIs"]
-        FORMAT_CTX["format.py\nformat_context()\nNumbered blocks for LLM prompt"]
-        FORMAT_SRC["format.py\nformat_sources()\nSource cards for UI"]
-    end
-
-    CHROMA[("🗄️ ChromaDB\nchroma_db/")]
-    LLM["🤖 Claude Haiku\nAnswers using only\nprovided FOI excerpts\nwith CAM reference citations"]
-
-    subgraph ui["Streamlit UI"]
-        ANSWER["Answer text"]
-        SOURCES["Expandable source cards\n(ref, title, date, relevance score, link)"]
-    end
-
-    USER --> INPUT --> SEMBED --> SEARCH
-    CHROMA --> SEARCH
-    SEARCH --> FORMAT_CTX --> LLM --> ANSWER
-    SEARCH --> FORMAT_SRC --> SOURCES
-```
-
----
-
-## Component Summary
+## Component summary
 
 | Module | Responsibility |
 |---|---|
@@ -70,6 +84,8 @@ flowchart TD
 | `src/ingest/chunk.py` | Paragraph-aware splitting into 800-char overlapping chunks |
 | `src/ingest/embed.py` | Shared `all-MiniLM-L6-v2` model; returns 384-dim float vectors |
 | `src/ingest/pipeline.py` | Orchestrates full ingest: load → clean → chunk → embed → upsert |
-| `src/retrieval/search.py` | Query embedding → ChromaDB → deduplicate to one result per FOI |
+| `src/db.py` | Connection helper; schema setup (foi_chunks HNSW index, foi_feedback table) |
+| `src/retrieval/search.py` | Query embedding → pgvector HNSW → deduplicate to one result per FOI; optional recency boost |
 | `src/retrieval/format.py` | Shape hits into LLM context string and UI source dicts |
-| `src/app/main.py` | Streamlit UI; calls retrieval then Claude Haiku for the final answer |
+| `src/app/flask_app.py` | All routes: public portal, staff portal, feedback, eval dashboard, annotation |
+| `src/eval/run.py` | Evaluation logic: search sweep across K values; precision, recall, MRR, mean rank; LLM answer generation |

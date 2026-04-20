@@ -14,9 +14,13 @@ dependencies = [
     "psycopg2-binary>=2.9",
     "pgvector>=0.3",
     "anthropic>=0.40",
+    "fastapi>=0.100",
+    "uvicorn>=0.30",
+    "flask>=3.0",
     "streamlit>=1.40",
     "python-dotenv>=1.0",
     "onnxruntime>=1.14,<1.24",
+    "markdown (>=3.10.2,<4.0.0)",
 ]
 
 

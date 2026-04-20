@@ -27,10 +27,11 @@ from pgvector.psycopg2 import register_vector
 EMBEDDING_DIM = 384  # all-MiniLM-L6-v2
 
 
-def get_conn() -> psycopg2.extensions.connection:
+def get_conn(register: bool = True) -> psycopg2.extensions.connection:
     """Open a psycopg2 connection with pgvector types registered."""
     conn = psycopg2.connect(os.environ["DATABASE_URL"])
-    register_vector(conn)
+    if register:
+        register_vector(conn)
     return conn
 
 
@@ -41,6 +42,12 @@ def ensure_schema(conn: psycopg2.extensions.connection) -> None:
     """
     with conn.cursor() as cur:
         cur.execute("CREATE EXTENSION IF NOT EXISTS vector")
+    conn.commit()
+
+    # Register vector type now that the extension is guaranteed to exist
+    register_vector(conn)
+
+    with conn.cursor() as cur:
 
         cur.execute("""
             CREATE TABLE IF NOT EXISTS foi_chunks (
@@ -65,4 +72,35 @@ def ensure_schema(conn: psycopg2.extensions.connection) -> None:
             WITH (m = 16, ef_construction = 64)
         """)
 
+    conn.commit()
+
+
+def ensure_feedback_table(conn) -> None:
+    """Idempotently create the feedback table."""
+    with conn.cursor() as cur:
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS foi_feedback (
+                id         SERIAL PRIMARY KEY,
+                portal     TEXT NOT NULL,
+                query      TEXT,
+                vote       TEXT NOT NULL CHECK (vote IN ('yes', 'no')),
+                created_at TIMESTAMP DEFAULT NOW()
+            )
+        """)
+    conn.commit()
+
+
+def ensure_query_log_table(conn) -> None:
+    """Idempotently create the query log table."""
+    with conn.cursor() as cur:
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS foi_query_log (
+                id         SERIAL PRIMARY KEY,
+                portal     TEXT NOT NULL,
+                query      TEXT,
+                answer     TEXT,
+                n_sources  INTEGER,
+                created_at TIMESTAMP DEFAULT NOW()
+            )
+        """)
     conn.commit()

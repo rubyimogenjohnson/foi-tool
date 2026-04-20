@@ -1,0 +1,935 @@
+{
+  "metrics": {
+    "n_questions": 30,
+    "hit_rate": 0.9667,
+    "mean_precision": 0.1111,
+    "mean_recall": 0.7524,
+    "mrr": 0.635,
+    "mean_rank": 3.21,
+    "found_rate": 0.9667
+  },
+  "results": [
+    {
+      "id": "q01",
+      "question": "Does Camden have any current or expected gaps in adult social care or children's social care placements?",
+      "relevant_identifiers": [
+        "CAM10600"
+      ],
+      "result_identifiers": [
+        "CAM10600",
+        "CAM4464",
+        "CAM7767",
+        "CAM7133",
+        "CAM9352",
+        "CAM8828",
+        "CAM5789",
+        "CAM10896",
+        "CAM5085",
+        "CAM8587",
+        "CAM2920",
+        "CAM3332",
+        "CAM9747",
+        "CAM6457",
+        "CAM5676"
+      ],
+      "hit": 1,
+      "precision": 0.0667,
+      "recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "rank": 1
+    },
+    {
+      "id": "q02",
+      "question": "How many teachers in Camden maintained schools were suspended or formally investigated in recent academic years?",
+      "relevant_identifiers": [
+        "CAM10725"
+      ],
+      "result_identifiers": [
+        "CAM10725",
+        "CAM6833",
+        "CAM8799",
+        "CAM9402",
+        "CAM7272",
+        "CAM9270",
+        "CAM5098",
+        "CAM5097",
+        "CAM5953",
+        "CAM7195",
+        "CAM9745",
+        "CAM4459",
+        "CAM6866",
+        "CAM7193",
+        "CAM2154"
+      ],
+      "hit": 1,
+      "precision": 0.0667,
+      "recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "rank": 1
+    },
+    {
+      "id": "q03",
+      "question": "What information does Camden hold about the encampment on Byng Place in Bloomsbury?",
+      "relevant_identifiers": [
+        "CAM10783"
+      ],
+      "result_identifiers": [
+        "CAM9583",
+        "CAM3408",
+        "CAM4395",
+        "CAM10783",
+        "CAM6922",
+        "CAM3846",
+        "CAM6104",
+        "CAM11838",
+        "CAM5010",
+        "CAM10765",
+        "CAM10750",
+        "CAM9508",
+        "CAM5036",
+        "CAM10983",
+        "CAM4937"
+      ],
+      "hit": 1,
+      "precision": 0.0667,
+      "recall": 1.0,
+      "reciprocal_rank": 0.25,
+      "rank": 4
+    },
+    {
+      "id": "q04",
+      "question": "How many young adults aged 18 to 25 are living in Camden's adult hostel pathway?",
+      "relevant_identifiers": [
+        "CAM10790"
+      ],
+      "result_identifiers": [
+        "CAM10790",
+        "CAM11253",
+        "CAM9747",
+        "CAM3956",
+        "CAM3012",
+        "CAM2634",
+        "CAM8476",
+        "CAM8951",
+        "CAM3263",
+        "CAM3523",
+        "CAM11377",
+        "CAM8306",
+        "CAM2965",
+        "CAM5214",
+        "CAM6620"
+      ],
+      "hit": 1,
+      "precision": 0.0667,
+      "recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "rank": 1
+    },
+    {
+      "id": "q05",
+      "question": "Which youth clubs and youth centres has Camden funded between 2015 and 2026?",
+      "relevant_identifiers": [
+        "CAM10920",
+        "CAM11616",
+        "CAM11604"
+      ],
+      "result_identifiers": [
+        "CAM8951",
+        "CAM11616",
+        "CAM11003",
+        "CAM11056",
+        "CAM10212",
+        "CAM4903",
+        "CAM6088",
+        "CAM9599",
+        "CAM6028",
+        "CAM9306",
+        "CAM4009",
+        "CAM9102",
+        "CAM11226",
+        "CAM10920",
+        "CAM8476"
+      ],
+      "hit": 1,
+      "precision": 0.1333,
+      "recall": 0.6667,
+      "reciprocal_rank": 0.5,
+      "rank": 2
+    },
+    {
+      "id": "q06",
+      "question": "How much does Camden spend each year on lift maintenance and lift refurbishments?",
+      "relevant_identifiers": [
+        "CAM2196",
+        "CAM10923",
+        "CAM1494",
+        "CAM3343"
+      ],
+      "result_identifiers": [
+        "CAM2418",
+        "CAM3343",
+        "CAM10923",
+        "CAM2095",
+        "CAM6597",
+        "CAM2109",
+        "CAM6243",
+        "CAM2196",
+        "CAM12278",
+        "CAM6596",
+        "CAM2936",
+        "CAM8440",
+        "CAM7061",
+        "CAM4014",
+        "CAM4126"
+      ],
+      "hit": 1,
+      "precision": 0.2,
+      "recall": 0.75,
+      "reciprocal_rank": 0.5,
+      "rank": 2
+    },
+    {
+      "id": "q07",
+      "question": "What domestic abuse case management system and IDVA provision does Camden use?",
+      "relevant_identifiers": [
+        "CAM10942"
+      ],
+      "result_identifiers": [
+        "CAM10942",
+        "CAM8687",
+        "CAM5154",
+        "CAM5548",
+        "CAM3044",
+        "CAM7427",
+        "CAM3803",
+        "CAM2319",
+        "CAM7912",
+        "CAM10439",
+        "CAM7242",
+        "CAM11974",
+        "CAM3196",
+        "CAM12345",
+        "CAM9272"
+      ],
+      "hit": 1,
+      "precision": 0.0667,
+      "recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "rank": 1
+    },
+    {
+      "id": "q08",
+      "question": "What are Camden's eligibility criteria for single-handed and double-handed care in adult social care?",
+      "relevant_identifiers": [
+        "CAM10951"
+      ],
+      "result_identifiers": [
+        "CAM10951",
+        "CAM10600",
+        "CAM9822",
+        "CAM5979",
+        "CAM6484",
+        "CAM5827",
+        "CAM5676",
+        "CAM7133",
+        "CAM5848",
+        "CAM10316",
+        "CAM8988",
+        "CAM6095",
+        "CAM10896",
+        "CAM7858",
+        "CAM7711"
+      ],
+      "hit": 1,
+      "precision": 0.0667,
+      "recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "rank": 1
+    },
+    {
+      "id": "q09",
+      "question": "Is Camden relocating the Regis Road Recycling Centre as part of the Kentish Town Industrial Area regeneration?",
+      "relevant_identifiers": [
+        "CAM10980"
+      ],
+      "result_identifiers": [
+        "CAM10980",
+        "CAM6631",
+        "CAM7451",
+        "CAM7241",
+        "CAM10991",
+        "CAM11229",
+        "CAM3405",
+        "CAM6771",
+        "CAM6151",
+        "CAM6104",
+        "CAM5177",
+        "CAM7589",
+        "CAM4937",
+        "CAM6926",
+        "CAM6195"
+      ],
+      "hit": 1,
+      "precision": 0.0667,
+      "recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "rank": 1
+    },
+    {
+      "id": "q10",
+      "question": "How many homeless households and families with children are in temporary accommodation in Camden?",
+      "relevant_identifiers": [
+        "CAM10756",
+        "CAM10992",
+        "CAM10814"
+      ],
+      "result_identifiers": [
+        "CAM6620",
+        "CAM4481",
+        "CAM6444",
+        "CAM7015",
+        "CAM4499",
+        "CAM10814",
+        "CAM2965",
+        "CAM7745",
+        "CAM6931",
+        "CAM4325",
+        "CAM6264",
+        "CAM2545",
+        "CAM10591",
+        "CAM7765",
+        "CAM10992"
+      ],
+      "hit": 1,
+      "precision": 0.1333,
+      "recall": 0.6667,
+      "reciprocal_rank": 0.1667,
+      "rank": 6
+    },
+    {
+      "id": "q11",
+      "question": "How many people approached Camden as homeless and how many were recognised as refugees?",
+      "relevant_identifiers": [
+        "CAM10979"
+      ],
+      "result_identifiers": [
+        "CAM6322",
+        "CAM6324",
+        "CAM9879",
+        "CAM6931",
+        "CAM10979",
+        "CAM4481",
+        "CAM3138",
+        "CAM10052",
+        "CAM6287",
+        "CAM5012",
+        "CAM6311",
+        "CAM10909",
+        "CAM6264",
+        "CAM9422",
+        "CAM10867"
+      ],
+      "hit": 1,
+      "precision": 0.0667,
+      "recall": 1.0,
+      "reciprocal_rank": 0.2,
+      "rank": 5
+    },
+    {
+      "id": "q12",
+      "question": "How many households are waiting for wheelchair accessible social housing in Camden?",
+      "relevant_identifiers": [
+        "CAM10964"
+      ],
+      "result_identifiers": [
+        "CAM10964",
+        "CAM6386",
+        "CAM8988",
+        "CAM6775",
+        "CAM11684",
+        "CAM12036",
+        "CAM9422",
+        "CAM4481",
+        "CAM6287",
+        "CAM5971",
+        "CAM3558",
+        "CAM6095",
+        "CAM10052",
+        "CAM3754",
+        "CAM4675"
+      ],
+      "hit": 1,
+      "precision": 0.0667,
+      "recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "rank": 1
+    },
+    {
+      "id": "q13",
+      "question": "How many inspections of private rented homes has Camden carried out over the last five years?",
+      "relevant_identifiers": [
+        "CAM10959"
+      ],
+      "result_identifiers": [
+        "CAM10959",
+        "CAM2327",
+        "CAM6553",
+        "CAM3028",
+        "CAM6291",
+        "CAM9508",
+        "CAM9759",
+        "CAM4280",
+        "CAM11814",
+        "CAM3120",
+        "CAM6858",
+        "CAM12218",
+        "CAM3673",
+        "CAM6218",
+        "CAM3249"
+      ],
+      "hit": 1,
+      "precision": 0.0667,
+      "recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "rank": 1
+    },
+    {
+      "id": "q14",
+      "question": "How many complaints has Camden received about damp and mould in council housing?",
+      "relevant_identifiers": [
+        "CAM11053",
+        "CAM6967",
+        "CAM9995",
+        "CAM8368",
+        "CAM7885"
+      ],
+      "result_identifiers": [
+        "CAM4196",
+        "CAM5842",
+        "CAM4248",
+        "CAM6544",
+        "CAM6560",
+        "CAM9995",
+        "CAM8707",
+        "CAM4587",
+        "CAM7885",
+        "CAM3024",
+        "CAM12096",
+        "CAM8368",
+        "CAM4655",
+        "CAM2477",
+        "CAM6967"
+      ],
+      "hit": 1,
+      "precision": 0.2667,
+      "recall": 0.8,
+      "reciprocal_rank": 0.1667,
+      "rank": 6
+    },
+    {
+      "id": "q15",
+      "question": "Does Camden have a list or map of fruit-bearing trees in the borough?",
+      "relevant_identifiers": [
+        "CAM11054"
+      ],
+      "result_identifiers": [
+        "CAM11054",
+        "CAM4754",
+        "CAM9583",
+        "CAM10003",
+        "CAM5946",
+        "CAM2744",
+        "CAM10121",
+        "CAM4939",
+        "CAM9176",
+        "CAM12041",
+        "CAM8835",
+        "CAM6417",
+        "CAM10200",
+        "CAM7492",
+        "CAM6644"
+      ],
+      "hit": 1,
+      "precision": 0.0667,
+      "recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "rank": 1
+    },
+    {
+      "id": "q16",
+      "question": "How many PCNs has Camden issued for parking in disabled bay D159 on Marsden Street?",
+      "relevant_identifiers": [
+        "CAM11061"
+      ],
+      "result_identifiers": [
+        "CAM11061",
+        "CAM10610",
+        "CAM10117",
+        "CAM3943",
+        "CAM11816",
+        "CAM5613",
+        "CAM7795",
+        "CAM12407",
+        "CAM7964",
+        "CAM7226",
+        "CAM5223",
+        "CAM3031%20RESPONSE.PDF",
+        "CAM6906",
+        "CAM11140",
+        "CAM5723"
+      ],
+      "hit": 1,
+      "precision": 0.0667,
+      "recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "rank": 1
+    },
+    {
+      "id": "q17",
+      "question": "Which restricted bus lanes on Camden-managed roads are currently enforced?",
+      "relevant_identifiers": [
+        "CAM10168",
+        "CAM8683",
+        "CAM11062"
+      ],
+      "result_identifiers": [
+        "CAM11062",
+        "CAM7069",
+        "CAM8833",
+        "CAM8903",
+        "CAM11760",
+        "CAM2313",
+        "CAM12333",
+        "CAM6747",
+        "CAM10168",
+        "CAM3943",
+        "CAM6460",
+        "CAM9523",
+        "CAM12239",
+        "CAM7068",
+        "CAM8665"
+      ],
+      "hit": 1,
+      "precision": 0.1333,
+      "recall": 0.6667,
+      "reciprocal_rank": 1.0,
+      "rank": 1
+    },
+    {
+      "id": "q18",
+      "question": "What air quality and traffic volume data does Camden hold for specific streets?",
+      "relevant_identifiers": [
+        "CAM11065",
+        "CAM11145"
+      ],
+      "result_identifiers": [
+        "CAM11145",
+        "CAM11065",
+        "CAM10933",
+        "CAM7017",
+        "CAM11765",
+        "CAM8071",
+        "CAM8098",
+        "CAM8065",
+        "CAM3193",
+        "CAM3462",
+        "CAM8043",
+        "CAM5748",
+        "CAM8044",
+        "CAM7695",
+        "CAM9553"
+      ],
+      "hit": 1,
+      "precision": 0.1333,
+      "recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "rank": 1
+    },
+    {
+      "id": "q19",
+      "question": "How many warnings or fines were given to Hampstead Cemetery users for having dogs off lead?",
+      "relevant_identifiers": [
+        "CAM11068"
+      ],
+      "result_identifiers": [
+        "CAM8989",
+        "CAM11068",
+        "CAM11025",
+        "CAM6976",
+        "CAM4406",
+        "CAM9383",
+        "CAM11112",
+        "CAM7612",
+        "CAM4118",
+        "CAM10540",
+        "CAM9961",
+        "CAM4838",
+        "CAM8309",
+        "CAM8405",
+        "CAM8835"
+      ],
+      "hit": 1,
+      "precision": 0.0667,
+      "recall": 1.0,
+      "reciprocal_rank": 0.5,
+      "rank": 2
+    },
+    {
+      "id": "q20",
+      "question": "How many school attendance fines did Camden issue in the 2024/25 academic year?",
+      "relevant_identifiers": [
+        "CAM10999"
+      ],
+      "result_identifiers": [
+        "CAM8799",
+        "CAM6866",
+        "CAM9402",
+        "CAM11460",
+        "CAM4459",
+        "CAM7195",
+        "CAM9375",
+        "CAM2038",
+        "CAM7272",
+        "CAM9270",
+        "CAM6378",
+        "CAM8653",
+        "CAM6237",
+        "CAM9745",
+        "CAM6833"
+      ],
+      "hit": 0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "reciprocal_rank": 0.0,
+      "rank": null
+    },
+    {
+      "id": "q21",
+      "question": "How much has Camden spent on consultants and external consultancy work?",
+      "relevant_identifiers": [
+        "CAM9659",
+        "CAM11010",
+        "CAM9504",
+        "CAM9648",
+        "CAM6837"
+      ],
+      "result_identifiers": [
+        "CAM12258",
+        "CAM7061",
+        "CAM5655",
+        "CAM12255",
+        "CAM5488",
+        "CAM11574",
+        "CAM7238",
+        "CAM8555",
+        "CAM10542",
+        "CAM9648",
+        "CAM8818",
+        "CAM2418",
+        "CAM3349",
+        "CAM9659",
+        "CAM3198"
+      ],
+      "hit": 1,
+      "precision": 0.1333,
+      "recall": 0.4,
+      "reciprocal_rank": 0.1,
+      "rank": 10
+    },
+    {
+      "id": "q22",
+      "question": "How much does Camden spend on translation, interpreting and language services, and who supplies them?",
+      "relevant_identifiers": [
+        "CAM3632",
+        "CAM11038",
+        "CAM9566",
+        "CAM11017",
+        "CAM6706"
+      ],
+      "result_identifiers": [
+        "CAM6430",
+        "CAM7788",
+        "CAM7061",
+        "CAM11451",
+        "CAM11152",
+        "CAM6225",
+        "CAM3632",
+        "CAM6706",
+        "CAM5926",
+        "CAM11530",
+        "CAM6299",
+        "CAM10485",
+        "CAM2057",
+        "CAM11017",
+        "CAM8555"
+      ],
+      "hit": 1,
+      "precision": 0.2,
+      "recall": 0.6,
+      "reciprocal_rank": 0.1429,
+      "rank": 7
+    },
+    {
+      "id": "q23",
+      "question": "What information has Camden released about management and heating issues at Tiptree Building on Castlehaven Road?",
+      "relevant_identifiers": [
+        "CAM8314",
+        "CAM10800",
+        "CAM10723"
+      ],
+      "result_identifiers": [
+        "CAM9996",
+        "CAM3195",
+        "CAM6104",
+        "CAM7066",
+        "CAM10800",
+        "CAM3421",
+        "CAM7449",
+        "CAM4196",
+        "CAM11102",
+        "CAM10246",
+        "CAM4765",
+        "CAM9508",
+        "CAM8626",
+        "CAM6644",
+        "CAM10970"
+      ],
+      "hit": 1,
+      "precision": 0.0667,
+      "recall": 0.3333,
+      "reciprocal_rank": 0.2,
+      "rank": 5
+    },
+    {
+      "id": "q24",
+      "question": "What does Camden hold about heating, hot water and other estate issues on the Curnock Estate?",
+      "relevant_identifiers": [
+        "CAM6804",
+        "CAM11032",
+        "CAM9158",
+        "CAM7230",
+        "CAM10257",
+        "CAM10244"
+      ],
+      "result_identifiers": [
+        "CAM2315",
+        "CAM7357",
+        "CAM4846",
+        "CAM5036",
+        "CAM9508",
+        "CAM7530",
+        "CAM4457",
+        "CAM11102",
+        "CAM10257",
+        "CAM7066",
+        "CAM4395",
+        "CAM4765",
+        "CAM3520",
+        "CAM4141",
+        "CAM4969"
+      ],
+      "hit": 1,
+      "precision": 0.0667,
+      "recall": 0.1667,
+      "reciprocal_rank": 0.1111,
+      "rank": 9
+    },
+    {
+      "id": "q25",
+      "question": "What information is available about the heating project and right to buy valuations at Holly Lodge Estate?",
+      "relevant_identifiers": [
+        "CAM11064",
+        "CAM8122",
+        "CAM9100",
+        "CAM7804",
+        "CAM7918"
+      ],
+      "result_identifiers": [
+        "CAM11064",
+        "CAM7804",
+        "CAM8122",
+        "CAM7918",
+        "CAM3937",
+        "CAM2493",
+        "CAM2724",
+        "CAM3510",
+        "CAM2370",
+        "CAM9100",
+        "CAM10983",
+        "CAM3712",
+        "CAM4542",
+        "CAM5960",
+        "CAM6239"
+      ],
+      "hit": 1,
+      "precision": 0.3333,
+      "recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "rank": 1
+    },
+    {
+      "id": "q26",
+      "question": "How many Section 215 notices has Camden issued for untidy land or buildings?",
+      "relevant_identifiers": [
+        "CAM11001",
+        "CAM3387"
+      ],
+      "result_identifiers": [
+        "CAM11001",
+        "CAM3028",
+        "CAM7042",
+        "CAM5963",
+        "CAM2198",
+        "CAM9508",
+        "CAM3120",
+        "CAM4141",
+        "CAM10633",
+        "CAM3115",
+        "CAM12114",
+        "CAM6858",
+        "CAM3249",
+        "CAM8935",
+        "CAM3070"
+      ],
+      "hit": 1,
+      "precision": 0.0667,
+      "recall": 0.5,
+      "reciprocal_rank": 1.0,
+      "rank": 1
+    },
+    {
+      "id": "q27",
+      "question": "What S106 agreements or affordable housing contributions has Camden reported on?",
+      "relevant_identifiers": [
+        "CAM10858",
+        "CAM10981",
+        "CAM10526",
+        "CAM9868",
+        "CAM10584"
+      ],
+      "result_identifiers": [
+        "CAM5588",
+        "CAM9508",
+        "CAM7066",
+        "CAM2208",
+        "CAM11770",
+        "CAM6243",
+        "CAM4675",
+        "CAM8934",
+        "CAM10584",
+        "CAM7374",
+        "CAM11411",
+        "CAM7015",
+        "CAM11457",
+        "CAM11045",
+        "CAM6774"
+      ],
+      "hit": 1,
+      "precision": 0.0667,
+      "recall": 0.2,
+      "reciprocal_rank": 0.1111,
+      "rank": 9
+    },
+    {
+      "id": "q28",
+      "question": "How many children have been adopted in Camden in the last few years?",
+      "relevant_identifiers": [
+        "CAM10803",
+        "CAM7510"
+      ],
+      "result_identifiers": [
+        "CAM10803",
+        "CAM9966",
+        "CAM2920",
+        "CAM8719",
+        "CAM5789",
+        "CAM6457",
+        "CAM7510",
+        "CAM7767",
+        "CAM10102",
+        "CAM11016",
+        "CAM9352",
+        "CAM12213",
+        "CAM2656",
+        "CAM9747",
+        "CAM3523"
+      ],
+      "hit": 1,
+      "precision": 0.1333,
+      "recall": 1.0,
+      "reciprocal_rank": 1.0,
+      "rank": 1
+    },
+    {
+      "id": "q29",
+      "question": "What vaping enforcement action has Camden taken against convenience stores, newsagents and off licences?",
+      "relevant_identifiers": [
+        "CAM9893",
+        "CAM6548",
+        "CAM10446",
+        "CAM10810",
+        "CAM8020",
+        "CAM10370",
+        "CAM6659"
+      ],
+      "result_identifiers": [
+        "CAM8020",
+        "CAM10810",
+        "CAM4207",
+        "CAM5218_RESPONSE",
+        "CAM7168",
+        "CAM11837",
+        "CAM9404",
+        "CAM7645",
+        "CAM6015",
+        "CAM3868",
+        "CAM10571",
+        "CAM10446",
+        "CAM10659",
+        "CAM8715",
+        "CAM9893"
+      ],
+      "hit": 1,
+      "precision": 0.2667,
+      "recall": 0.5714,
+      "reciprocal_rank": 1.0,
+      "rank": 1
+    },
+    {
+      "id": "q30",
+      "question": "What has Camden disclosed about its pension fund holdings, reports or investments?",
+      "relevant_identifiers": [
+        "CAM11059",
+        "CAM9661",
+        "CAM9418",
+        "CAM9565",
+        "CAM10383",
+        "CAM9533",
+        "CAM9702",
+        "CAM9593"
+      ],
+      "result_identifiers": [
+        "CAM8911",
+        "CAM8373",
+        "CAM3675",
+        "CAM8760",
+        "CAM4938",
+        "CAM2083",
+        "CAM2290",
+        "CAM3048",
+        "CAM4706",
+        "CAM9593",
+        "CAM9062",
+        "CAM5260",
+        "CAM9661",
+        "CAM2466",
+        "CAM2826"
+      ],
+      "hit": 1,
+      "precision": 0.1333,
+      "recall": 0.25,
+      "reciprocal_rank": 0.1,
+      "rank": 10
+    }
+  ]
+}

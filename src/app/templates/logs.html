@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block title %}Query log — Camden FOI{% endblock %}
+
+{% block service_header %}
+<div class="lbcamden-header lbcamden-header--site-navigation">
+  <div class="lbcamden-header__bar govuk-width-container">
+    <div class="lbcamden-header__title">
+      <a href="/staff" class="lbcamden-header__link">FOI Staff Search</a>
+    </div>
+    <nav class="lbcamden-header__navigation" aria-label="Staff navigation">
+      <ul class="lbcamden-header__navigation-list">
+        <li class="lbcamden-header__navigation-item">
+          <a class="lbcamden-header__navigation-item-link" href="/staff/eval">Evaluation</a>
+        </li>
+        <li class="lbcamden-header__navigation-item">
+          <a class="lbcamden-header__navigation-item-link" href="/staff/eval/annotate">Add questions</a>
+        </li>
+        <li class="lbcamden-header__navigation-item lbcamden-header__navigation-item--active">
+          <a class="lbcamden-header__navigation-item-link" href="/staff/logs">Query log</a>
+        </li>
+        <li class="lbcamden-header__navigation-item">
+          <a class="lbcamden-header__navigation-item-link" href="/staff/stats">Feedback stats</a>
+        </li>
+        <li class="lbcamden-header__navigation-item">
+          <a class="lbcamden-header__navigation-item-link" href="/">Public portal</a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</div>
+<div class="govuk-width-container">
+  <div class="govuk-phase-banner">
+    <p class="govuk-phase-banner__content">
+      <strong class="govuk-tag govuk-phase-banner__content__tag govuk-tag--blue">Internal</strong>
+      <span class="govuk-phase-banner__text">For Camden Council staff only</span>
+    </p>
+  </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-full">
+    <h1 class="govuk-heading-xl">Query log</h1>
+    <p class="govuk-body">Every question asked and the AI response returned. {{ total }} total entr{{ "y" if total == 1 else "ies" }}.</p>
+
+    {# Portal filter #}
+    <div class="govuk-button-group govuk-!-margin-bottom-4">
+      <a href="/staff/logs?portal=all"    class="govuk-link {% if portal == 'all' %}govuk-!-font-weight-bold{% endif %}">All</a>
+      <a href="/staff/logs?portal=staff"  class="govuk-link {% if portal == 'staff' %}govuk-!-font-weight-bold{% endif %}">Staff</a>
+      <a href="/staff/logs?portal=public" class="govuk-link {% if portal == 'public' %}govuk-!-font-weight-bold{% endif %}">Public</a>
+    </div>
+
+    {% if logs %}
+    <table class="govuk-table">
+      <thead class="govuk-table__head">
+        <tr class="govuk-table__row">
+          <th class="govuk-table__header" scope="col">When</th>
+          <th class="govuk-table__header" scope="col">Portal</th>
+          <th class="govuk-table__header" scope="col">Sources</th>
+          <th class="govuk-table__header" scope="col">Question</th>
+          <th class="govuk-table__header" scope="col">Answer</th>
+        </tr>
+      </thead>
+      <tbody class="govuk-table__body">
+        {% for log in logs %}
+        <tr class="govuk-table__row">
+          <td class="govuk-table__cell govuk-!-font-size-14" style="white-space:nowrap">{{ log.created_at }}</td>
+          <td class="govuk-table__cell">
+            <strong class="govuk-tag {% if log.portal == 'staff' %}govuk-tag--blue{% else %}govuk-tag--grey{% endif %}">
+              {{ log.portal }}
+            </strong>
+          </td>
+          <td class="govuk-table__cell govuk-!-font-size-14">{{ log.n_sources }}</td>
+          <td class="govuk-table__cell govuk-!-font-size-14" style="min-width:200px">{{ log.query }}</td>
+          <td class="govuk-table__cell govuk-!-font-size-14" style="min-width:260px;max-width:420px">
+            {% if log.answer %}
+              <details class="govuk-details govuk-!-margin-bottom-0">
+                <summary class="govuk-details__summary">
+                  <span class="govuk-details__summary-text">
+                    {{ log.answer[:80] }}{% if log.answer | length > 80 %}…{% endif %}
+                  </span>
+                </summary>
+                <div class="govuk-details__text" style="white-space:pre-wrap">{{ log.answer }}</div>
+              </details>
+            {% else %}
+              &mdash;
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    {# Pagination #}
+    {% if total_pages > 1 %}
+    <nav class="govuk-!-margin-top-4" aria-label="Pagination">
+      <div class="govuk-button-group">
+        {% if page > 1 %}
+          <a href="/staff/logs?portal={{ portal }}&page={{ page - 1 }}" class="govuk-link">&larr; Previous</a>
+        {% endif %}
+        <span class="govuk-body-s">Page {{ page }} of {{ total_pages }}</span>
+        {% if page < total_pages %}
+          <a href="/staff/logs?portal={{ portal }}&page={{ page + 1 }}" class="govuk-link">Next &rarr;</a>
+        {% endif %}
+      </div>
+    </nav>
+    {% endif %}
+
+    {% else %}
+    <div class="govuk-inset-text">No queries logged yet.</div>
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}
